@@ -44,9 +44,10 @@ jobs:
         mkdir -p ~/private_keys/
         echo '${{ secrets.KEYSTORE }}' | base64 --decode > ~/private_keys/key.jks
 
-    - run: cd mobile; yarn build:android
+    - run: cd mobile; npx cap sync android
+    - run: cd mobile; npx cap build android --keystorepath=$HOME/private_keys/key.jks
       env:
-        KEYSTORE_PATH: $HOME/private_keys/key.jks
+        # KEYSTORE_PATH: $HOME/private_keys/key.jks
         KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
         KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         KEYSTORE_ALIAS_PASS: ${{ secrets.KEYSTORE_ALIAS_PASS }}
