@@ -23,6 +23,7 @@ jobs:
     - run: cd app; yarn install
     - run: cd lib; yarn install
     - run: cd backend; yarn install
+    - run: cd mobile; yarn install
     - run: cd mobile/backend; yarn install
     - run: mkdir ~/.gyp && echo "{'variables':{'android_ndk_path':''}}" > ~/.gyp/include.gypi
     - run: cd mobile; yarn build
