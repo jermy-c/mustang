@@ -5,15 +5,10 @@ on:
   push:
     tags: 'v*'
 
-env:
-  KEYSTORE_PATH: ~/private_keys/key.jks
-  KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
-  KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
-  KEYSTORE_ALIAS_PASS: ${{ secrets.KEYSTORE_ALIAS_PASS }}
-
 jobs:
   build:
     runs-on: ubuntu-24.04
+    environment: Android
     permissions:
       contents: write
 
@@ -47,9 +42,14 @@ jobs:
 
     - run: |
         mkdir -p ~/private_keys/
-        echo '${{ secrets.KEYSTORE }}' > ~/private_keys/key.jks
+        echo '${{ secrets.KEYSTORE }}' | base64 --decode > ~/private_keys/key.jks
 
     - run: cd mobile; yarn build:android
+      env:
+        KEYSTORE_PATH: ~/private_keys/key.jks
+        KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+        KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+        KEYSTORE_ALIAS_PASS: ${{ secrets.KEYSTORE_ALIAS_PASS }}
 
     - name: Upload
       uses: actions/upload-artifact@v4
