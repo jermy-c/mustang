@@ -1,0 +1,37 @@
+name: Installers for Android
+
+on:
+  workflow_dispatch: # manually triggered
+  push:
+    tags: 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build installers for Android
+      uses: actions/setup-node@v3
+      with:
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: 22.x
+
+    - run: cd app/build; sh mustang-brand.sh
+    - run: cd app; yarn install
+    - run: cd lib; yarn install
+    - run: cd backend; yarn install
+    - run: cd mobile/backend; yarn install
+    - run: cd mobile/backend; yarn build
+    - run: cd mobile; yarn build && npx cap build android
+      env:
+        NODE_OPTIONS: '--max-old-space-size=32768'
+        MOBILE_ARCH: 'android-arm64'
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Installers Android
+        path: |
+          mobile/android/**
