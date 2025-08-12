@@ -24,7 +24,6 @@ jobs:
     - run: cd lib; yarn install
     - run: cd backend; yarn install
     - run: cd mobile/backend; yarn install
-    - run: cd mobile/backend; yarn build
     - run: cd mobile; yarn build && npx cap build android
       env:
         NODE_OPTIONS: '--max-old-space-size=32768'
