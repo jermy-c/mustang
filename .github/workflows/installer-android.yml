@@ -24,12 +24,12 @@ jobs:
     - run: cd lib; yarn install
     - run: cd backend; yarn install
     - run: cd mobile/backend; yarn install
+    - run: mkdir ~/.gyp && echo "{'variables':{'android_ndk_path':''}}" > ~/.gyp/include.gypi
     - run: cd mobile; yarn build
       env:
         NODE_OPTIONS: '--max-old-space-size=32768'
         MOBILE_ARCH: 'android-arm64'
-    - run: mkdir ~/.gyp && echo "{'variables':{'android_ndk_path':''}}" > ~/.gyp/include.gypi
-    - run: cd mobile; npx cap build android
+    - run: cd mobile; yarn build:android
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
