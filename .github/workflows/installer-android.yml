@@ -46,7 +46,7 @@ jobs:
 
     - run: cd mobile; yarn build:android
       env:
-        KEYSTORE_PATH: ~/private_keys/key.jks
+        KEYSTORE_PATH: $HOME/private_keys/key.jks
         KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
         KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         KEYSTORE_ALIAS_PASS: ${{ secrets.KEYSTORE_ALIAS_PASS }}
