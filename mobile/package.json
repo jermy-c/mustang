@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "build": "./build.sh",
-    "build:android": "cap sync android && cap build android --flavor=release",
+    "build:android": "cap sync android && cap build android",
     "start-android": "cap run android",
     "start-ios": "cap run ios",
     "preview": "vite preview",
