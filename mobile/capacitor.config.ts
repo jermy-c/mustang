@@ -19,6 +19,7 @@ const config: CapacitorConfig = {
       keystorePassword: env.KEYSTORE_PASS,
       keystoreAlias: env.KEYSTORE_ALIAS,
       keystoreAliasPassword: env.KEYSTORE_ALIAS_PASS,
+      releaseType: "APK",
     }
   }
 }
