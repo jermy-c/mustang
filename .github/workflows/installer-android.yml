@@ -34,6 +34,7 @@ jobs:
     - run: cd backend; yarn install
     - run: cd mobile; yarn install
     - run: cd mobile/backend; yarn install
+    - run: cd lib; yarn add bufferutil # explicitly include bufferutil otherwise it might not be included
     - run: mkdir ~/.gyp && echo "{'variables':{'android_ndk_path':''}}" > ~/.gyp/include.gypi
     - run: cd mobile; yarn build
       env:
