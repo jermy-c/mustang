@@ -57,5 +57,5 @@ jobs:
       with:
         name: Installers Android
         path: |
-          mobile/android/app/build/outputs/bundle/release/*.apk
-          mobile/android/app/build/outputs/bundle/release/*.aab
+          mobile/android/**/*.apk
+          mobile/android/**/*.aab
