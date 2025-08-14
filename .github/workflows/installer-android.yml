@@ -44,9 +44,9 @@ jobs:
     - run: |
         mkdir -p ~/private_keys/
         echo '${{ secrets.KEYSTORE }}' | base64 --decode > ~/private_keys/key.jks
-        export KEYSTORE_PATH=$HOME/private_keys/key.jks
 
-    - run: cd mobile; yarn build:android
+    # ~/ or $HOME doesn't work in env:
+    - run: cd mobile; export KEYSTORE_PATH=$HOME/private_keys/key.jks; yarn build:android
       env:
         # KEYSTORE_PATH: $HOME/private_keys/key.jks
         KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
