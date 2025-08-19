@@ -327,10 +327,10 @@ export class Event extends Observable {
       interval,
     };
     if (frequency == Frequency.Weekly) {
-      init.weekdays = weekdays ?? [this.startTime.getDay()]; // e.g. Monday and Thursday
+      init.weekdays = weekdays?.includes(this.startTime.getDay()) ? weekdays : [...weekdays?.length > 1 ? weekdays : [], this.startTime.getDay()]; // e.g. Monday and Thursday
     } else if (frequency == Frequency.Monthly || frequency == Frequency.Yearly) {
-      init.week = week;
       if (week) {
+        init.week = week == 5 && isLastWeekOfMonth(this.startTime) ? 5 : Math.ceil(this.startTime.getDate() / 7);
         init.weekdays = [this.startTime.getDay()]; // e.g. 3rd Wednesday of month
       }
     }
@@ -387,12 +387,14 @@ export class Event extends Observable {
     this.syncState = json.syncState;
     this.isCancelled = sanitize.boolean(json.isCancelled, false);
     this.lastUpdateTime = sanitize.date(json.lastUpdateTime, null);
+    this.lastMod = sanitize.date(json.lastMod, null);
   }
   toExtraJSON(): any {
     let json: any = {};
     json.syncState = this.syncState;
     json.isCancelled = this.isCancelled;
     json.lastUpdateTime = this.lastUpdateTime;
+    json.lastMod = this.lastMod;
     return json;
   }
 
@@ -565,7 +567,7 @@ export class Event extends Observable {
       this.recurrenceCase = RecurrenceCase.Exception;
       this.parentEvent.instances.remove(this);
       this.parentEvent.exceptions.add(this);
-      await this.parentEvent.save();
+      this.calendar.events.add(this);
     }
   }
 
@@ -819,4 +821,10 @@ export enum RecurrenceCase {
    * Like an instance, but at a different time or with modified properties.
    * Overrides a specific instance. */
   Exception = "exception",
+}
+
+function isLastWeekOfMonth(date: Date) {
+  date = new Date(date);
+  date.setDate(date.getDate() + 7);
+  return date.getDate() < 8;
 }

@@ -1,11 +1,11 @@
 import { Workspace, getWorkspaceByID, randomAccountColor } from "./Workspace";
+import type { WebBasedAuth } from "../Auth/WebBasedAuth";
 import { appGlobal } from "../app";
 import { Observable, notifyChangedProperty } from "../util/Observable";
 import { SpecificError, AbstractFunction, assert } from "../util/util";
 import { sanitize } from "../../../lib/util/sanitizeDatatypes";
 import { ArrayColl, Collection } from "svelte-collections";
 import type { ComponentType } from "svelte";
-import type { OAuth2 } from "../Auth/OAuth2";
 
 export class Account extends Observable {
   id: string;
@@ -29,7 +29,7 @@ export class Account extends Observable {
   @notifyChangedProperty
   authMethod = AuthMethod.Unknown;
   @notifyChangedProperty
-  oAuth2: OAuth2 = null;
+  oAuth2: WebBasedAuth = null;
   @notifyChangedProperty
   password: string | null = null;
   @notifyChangedProperty
@@ -106,6 +106,15 @@ export class Account extends Observable {
     return getAllAccounts().filter(acc => acc.mainAccount == this);
   }
 
+  /** The cookie store to use when loading this account. For `<webview partition="persist:...">` */
+  get webSessionID(): string | null {
+    return this.id;
+  }
+
+  /** User needs a software license to use this account */
+  needsLicense(): boolean {
+    return false;
+  }
 
   /** Saves the config in this account to disk.
    * Does not save the contents, e.g. messages. */

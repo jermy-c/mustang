@@ -13,7 +13,7 @@
     <RoundButton
       label={$t`Screen share`}
       classes="screen-share large"
-      selected={$me?.screenSharing}
+      selected={$me?.screenSharing || wantScreenShare}
       onClick={toggleScreenShare}
       icon={$me?.screenSharing ? ScreenShareIcon : ScreenShareOffIcon}
       iconSize="24px"
@@ -126,10 +126,6 @@
   import Scroll from "../Shared/Scroll.svelte";
   import HandIcon from '../asset/icon/meet/hand.svg?raw';
   import HandDownIcon from "lucide-svelte/icons/grab";
-  import CameraIcon from "lucide-svelte/icons/video";
-  import CameraOffIcon from "lucide-svelte/icons/video-off";
-  import MicrophoneIcon from "lucide-svelte/icons/mic";
-  import MicrophoneOffIcon from "lucide-svelte/icons/mic-off";
   import ScreenShareIcon from "lucide-svelte/icons/screen-share-off";
   import ScreenShareOffIcon from "lucide-svelte/icons/screen-share";
   import LeaveIcon from "lucide-svelte/icons/phone";
@@ -166,8 +162,7 @@
     meInited = true;
     me.cameraOn = cameraOnSetting.value;
     me.micOn = micOnSetting.value;
-    await stream.setMicOn(me.micOn, selectedMicSetting.value);
-    await stream.setCameraOn(me.cameraOn, selectedCameraSetting.value);
+    await stream.setCameraMicOn(me.cameraOn, me.micOn, selectedCameraSetting.value, selectedMicSetting.value);
     await getDevices();
   }
 
@@ -185,8 +180,7 @@
   async function leave() {
     await meeting.hangup();
     await stream.setScreenShare(false);
-    await stream.setMicOn(false);
-    await stream.setCameraOn(false);
+    await stream.setCameraMicOn(false, false);
     appGlobal.meetings.remove(meeting);
   }
 
@@ -196,8 +190,8 @@
 
   async function changeMicOn(on: boolean) {
     me.micOn = on;
-    await stream.setMicOn(me.micOn, selectedMicSetting.value);
     micOnSetting.value = me.micOn;
+    await stream.setMicOn(me.micOn, selectedMicSetting.value);
   }
 
   async function changeMicSelected(deviceID: string) {
@@ -207,8 +201,8 @@
 
   async function changeCameraOn(on: boolean) {
     me.cameraOn = on;
-    await stream.setCameraOn(me.cameraOn, selectedCameraSetting.value);
     cameraOnSetting.value = me.cameraOn;
+    await stream.setCameraOn(me.cameraOn, selectedCameraSetting.value);
   }
 
   async function changeCameraSelected(deviceID: string) {
@@ -217,13 +211,19 @@
   }
 
   let selectScreenShare: SelectScreenShare;
+  let wantScreenShare = false;
   async function toggleScreenShare() {
-    me.screenSharing = !me.screenSharing;
-    if (me.screenSharing) {
+    if (wantScreenShare) {
+      return;
+    }
+    wantScreenShare = !me.screenSharing;
+    if (wantScreenShare) {
       startScreenSharing()
         .catch(onScreenSharingError);
     } else {
+      wantScreenShare = false;
       await stream.setScreenShare(false);
+      me.screenSharing = false;
     }
   }
 
@@ -231,12 +231,16 @@
     await selectScreenShare.openSelector(onScreenSharingError);
     await stream.setScreenShare(true);
     await selectScreenShare.closeSelector();
+    wantScreenShare = false;
+    me.screenSharing = true;
   }
 
   async function onScreenSharingError(ex: Error) {
+    wantScreenShare = false;
     console.error(ex);
     await selectScreenShare.closeSelector();
     await stream.setScreenShare(false);
+    me.screenSharing = false;
   }
 
   let showViewSelector = false;

@@ -8,7 +8,8 @@ import { ImapFlow } from 'imapflow';
 import { Database } from "@radically-straightforward/sqlite"; // formerly @leafac/sqlite
 import Zip from "adm-zip";
 import ky from 'ky';
-import { shell, nativeTheme, Notification, Tray, nativeImage, app, BrowserWindow, webContents, Menu, MenuItemConstructorOptions, clipboard, NativeImage, session, desktopCapturer, type DesktopCapturerSource } from "electron";
+import { shell, nativeTheme, Notification, Tray, nativeImage, app, BrowserWindow, webContents, Menu, MenuItemConstructorOptions, clipboard, NativeImage, session, desktopCapturer, type DesktopCapturerSource, autoUpdater } from "electron";
+import electronUpdater from 'electron-updater';
 import nodemailer from 'nodemailer';
 import MailComposer from 'nodemailer/lib/mail-composer';
 import { DAVClient } from "tsdav";
@@ -17,6 +18,7 @@ import path from "node:path";
 import os from "node:os";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
+const { autoUpdater } = electronUpdater;
 
 let jpc: JPCWebSocket | null = null;
 
@@ -58,6 +60,8 @@ async function createSharedAppObject() {
     setAsDefaultApp,
     onScreenSharingSelect,
     restartApp,
+    checkForUpdate,
+    installUpdate,
     setTheme,
     openMenu,
     getConfigDir,
@@ -294,6 +298,37 @@ function restartApp() {
   app.quit();
 }
 
+/** @returns have update */
+async function checkForUpdate(): Promise<boolean | undefined> {
+  let result = await autoUpdater.checkForUpdates();
+  return result?.isUpdateAvailable;
+  /* return new Promise(async (resolve, reject) => {
+    let result = await autoUpdater.checkForUpdates();
+    if (result?.isUpdateAvailable) {
+      resolve(true);
+      return;
+    }
+    autoUpdater.once("update-available", () => {
+      resolve(true);
+    });
+    autoUpdater.once("update-not-available", () => {
+      resolve(false);
+    });
+    autoUpdater.once("error", reject);
+  });*/
+}
+
+async function installUpdate() {
+  await autoUpdater.downloadUpdate();
+  await new Promise((resolve, reject) => {
+    autoUpdater.once("update-downloaded", () => {
+      resolve(null);
+    });
+    autoUpdater.once("error", reject);
+  });
+  autoUpdater.quitAndInstall(true, true);
+}
+
 function setTheme(theme: "system" | "light" | "dark") {
   if (!["system", "light", "dark"].includes(theme)) {
     throw new Error("Bad theme name " + theme);
@@ -339,7 +374,7 @@ function showFileInFolder(filePath: string) {
   shell.showItemInFolder(filePath);
 }
 
-function onScreenSharingSelect(onSelect: (screens: DesktopCapturerSource[]) => Promise<DesktopCapturerSource>,
+function onScreenSharingSelect(onSelect: (screens: DesktopCapturerSource[], error?: Error) => Promise<DesktopCapturerSource>,
     thumbnailWidth: number, thumbnailHeight: number) {
   console.log("Screen sharing dialog", !!onSelect ? "shown" : "closed");
   if (!onSelect || typeof(onSelect) != "function") {
@@ -348,17 +383,23 @@ function onScreenSharingSelect(onSelect: (screens: DesktopCapturerSource[]) => P
   }
   session.defaultSession.setDisplayMediaRequestHandler(
     async (request, callback) => {
-      // Security
-      let url = new URL(request.securityOrigin);
-      // TODO Prod URL?
-      assert(url.protocol == "file" || url.hostname == "localhost", `Screen share not allowed from URL ${url.href}`);
-      assert(request.userGesture, `Screen share must be initiated by the user`);
-      let screens = await desktopCapturer.getSources({
-        types: ["screen", "window"],
-        thumbnailSize: { width: thumbnailWidth, height: thumbnailHeight },
-      });
-      let screen = await onSelect(screens);
-      callback({ video: screen, audio: 'loopback' });
+      try {
+        // Security
+        let url = new URL(request.securityOrigin);
+        assert(url.protocol == "file:" || url.hostname == "localhost", `Screen share not allowed from URL ${url.href}`);
+        assert(request.userGesture, `Screen share must be initiated by the user`);
+        let screens = await desktopCapturer.getSources({
+          types: ["screen", "window"],
+          thumbnailSize: { width: thumbnailWidth, height: thumbnailHeight },
+        });
+        let screen = await onSelect(screens);
+        callback({ video: screen, audio: 'loopback' });
+      } catch (ex) {
+        if (!(ex instanceof Error)) {
+          ex = new Error(ex + "");
+        }
+        onSelect([], ex as Error);
+      }
     },
     // If true, use the system picker if available.
     // Note: this is currently experimental. If the system picker

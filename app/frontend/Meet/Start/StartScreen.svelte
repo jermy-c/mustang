@@ -26,6 +26,7 @@
     </vbox>
   </vbox>
   <vbox flex class="meetings">
+    <vbox flex />
     <vbox flex class="upcoming">
       <hbox class="title font-small">{$t`Today's next meetings`}</hbox>
       <MeetingList meetings={upcomingMeetings}>
@@ -38,6 +39,7 @@
         <div slot="emptyMsg" class="emptyMsg font-small">{$t`No recent meetings`}</div>
       </MeetingList>
     </vbox>
+    <vbox flex />
     <hbox class="test">
       <ExpandSection>
         <vbox class="buttons">
@@ -55,33 +57,37 @@
   import { MeetingState, VideoConfMeeting } from "../../../logic/Meet/VideoConfMeeting";
   import { VideoStream } from "../../../logic/Meet/VideoStream";
   import { MeetingParticipant } from "../../../logic/Meet/Participant";
+  import { LiveKitAccount } from "../../../logic/Meet/LiveKit/LiveKitAccount";
   import { FakeMeeting } from "../../../logic/Meet/FakeMeeting";
   import { Event } from "../../../logic/Calendar/Event";
   import { joinConferenceByURL } from "../../../logic/Meet/StartCall";
   import { selectedPerson } from "../../Contacts/Person/Selected";
+  import { isLicensed } from "../../../logic/util/LicenseClient";
   import { appGlobal } from "../../../logic/app";
   import { MeetAccount } from "../../../logic/Meet/MeetAccount";
   import { LocalMediaDeviceStreams } from "../../../logic/Meet/LocalMediaDeviceStreams";
   import MeetingList from "./MeetingList.svelte";
+  import PersonPicture from "../../Contacts/Person/PersonPicture.svelte";
+  import ExpandSection from "../../Shared/ExpandSection.svelte";
+  import ErrorMessage, { ErrorGravity } from "../../Shared/ErrorMessage.svelte";
   import Button from "../../Shared/Button.svelte";
   import VideoIcon from 'lucide-svelte/icons/video';
   import AddToCalendarIcon from "lucide-svelte/icons/calendar-plus";
-  import PersonPicture from "../../Contacts/Person/PersonPicture.svelte";
-  import ErrorMessage, { ErrorGravity } from "../../Shared/ErrorMessage.svelte";
   import { gt, t } from "../../../l10n/l10n";
   import { catchErrors, logError } from "../../Util/error";
   import { onKeyEnter } from "../../Util/util";
   import { sleep, UserError } from "../../../logic/util/util";
-  import { mergeColls } from "svelte-collections";
+  import { onMount } from "svelte";
   import { faker } from "@faker-js/faker";
-  import ExpandSection from "../../Shared/ExpandSection.svelte";
 
-  const allEvents = mergeColls(appGlobal.calendars.map(calendar => calendar.events));
   const now = new Date();
-  const maxUpcoming = new Date(); // TODO now + 8 hours
-  const maxPrevious = new Date(); // TODO now - 14 days
-  const upcomingMeetings = allEvents.filter(event => event.startTime > now && event.startTime < maxUpcoming);
-  const previousMeetings = allEvents.filter(event => event.startTime < now && event.startTime > maxPrevious);
+  const maxUpcoming = new Date();
+  maxUpcoming.setHours(23); // today
+  maxUpcoming.setMinutes(59);
+  const maxPrevious = new Date();
+  maxPrevious.setDate(maxPrevious.getDate() - 14); // last 14 days
+  const upcomingMeetings = appGlobal.calendarEvents.filterObservable(event => event.startTime > now && event.startTime < maxUpcoming);
+  const previousMeetings = appGlobal.calendarEvents.filterObservable(event => event.startTime < now && event.startTime > maxPrevious).reverse();
 
   function getAccount(): MeetAccount {
     let account = appGlobal.meetAccounts.find(acc => acc.canVideo && acc.canMultipleParticipants);
@@ -184,6 +190,20 @@
   function showError(ex: Error) {
     errorMsg = ex.message ?? ex + "";
     logError(ex);
+  }
+
+  onMount(() => catchErrors(onLoad));
+  async function onLoad() {
+    // For paying users only, create a free Meet account for demo purposes
+    if (appGlobal.meetAccounts.isEmpty &&
+        appGlobal.emailAccounts.hasItems &&
+        await isLicensed()) {
+      let account = new LiveKitAccount();
+      account.name = "Demo";
+      account.url = "https://meet.mustang.im";
+      account.username = appGlobal.emailAccounts.first.emailAddress;
+      appGlobal.meetAccounts.add(account);
+    }
   }
 </script>
 

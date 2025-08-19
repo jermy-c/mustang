@@ -39,10 +39,12 @@ export class OWAAddressbook extends Addressbook {
       this.groups.clear();
       return;
     }
+    let newFolderID = !this.folderID; // Temporary until support for multiple address books
+    this.folderID ??= contacts.FolderId;
     if (!this.name) {
       this.name = contacts.DisplayName;
     }
-    if (!this.dbID) {
+    if (!this.dbID || newFolderID) {
       await this.save();
     }
 
@@ -124,11 +126,11 @@ export class OWAAddressbook extends Addressbook {
     }
   }
 
-  getPersonByPersonaID(id: string): OWAPerson | void {
+  getPersonByPersonaID(id: string): OWAPerson | undefined {
     return this.persons.find(p => p.personaID == id);
   }
 
-  getGroupByPersonaID(id: string): OWAGroup | void {
+  getGroupByPersonaID(id: string): OWAGroup | undefined {
     return this.groups.find(p => p.personaID == id);
   }
 

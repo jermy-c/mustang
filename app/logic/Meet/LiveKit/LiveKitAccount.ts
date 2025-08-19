@@ -7,14 +7,14 @@ export class LiveKitAccount extends MeetAccount {
   readonly protocol: string = "livekit";
   /* Authentication */
   oauth2: OAuth2;
-  /** To create a new meeting */
-  controllerBaseURL = "https://cloud-api.livekit.io/api/sandbox/";
 
   canVideo = true;
   canAudio = true;
   canScreenShare = true;
   canMultipleParticipants = true;
   canCreateURL = true;
+
+  readonly apiURL: URLString = "https://api.beonex.com/livekit-creator/";
 
   /** Meeting URL, and meeting link for invitees */
   get webFrontendBaseURL(): URLString {
@@ -40,6 +40,6 @@ export class LiveKitAccount extends MeetAccount {
 
   isMeetingURL(url: URL): boolean {
     return url.origin == this.webFrontendBaseURL &&
-      url.pathname.startsWith("/rooms/");
+      url.hash.includes("room=");
   }
 }

@@ -4,9 +4,7 @@
 * Payment: Upgrade
   * Upgrade page in Settings: Billing
   * Server
-* ISPDB CalDAV
 * OAuth
-  * Google: Add Parula brand - DONE
   * Google: Renewal TAC - Started, waiting for Google
   * Microsoft: localhost redirect URL - Client ID vs. account unclear
 * Calendar: DB change; main account
@@ -28,8 +26,6 @@
     * Invitations
     * Free/Busy
     * Tasks
-  * Meet
-    * Close camera
   * Contacts
     * Add new line with no value when editing
       (if we can do it without moving the other boxes)
@@ -89,11 +85,44 @@
 * Threading
 * Good
   * modern feeling
+## Stefanie
+* Onboarding
+  * Start with email setup, not selection screen
+  * Don't exit setup
+* gmx.net / web.de unable to verify the first certificate on macOS 14.5
+* Contacts: Add (+) when "All" selected: add to personal addressbook
+* Demo: Files: Add Files for persons
+* Chat: selected person not shown
+* Mail: Get out of Folder settings mode
  ## Freshness
 * Account colors
 * Icons for accounts: user-set
 * Pic for users, in identities
 * Unified inbox: Show account as tag or icon
+
+
+# WebApps
+
+* Add custom app
+  * Name
+  * URL
+  * Icon (Default: Automatic from favicon of URL)
+  * For Meet: Other people can see the same document based on the URL
+  * For Integration:
+    * URL for email address search
+    * URL for email subject substring search
+    * URL for project search
+* Store: Add more apps
+* window.open()
+* Save/load last URL of app, in separate localStorage item
+
+## During meeting
+* URL
+  * Catch clipboard with URL
+  * Share link via meeting
+  * Open URL shared
+* Share screen of Mustang (?)
+
 
 # Chat
 
@@ -153,16 +182,15 @@
 
 # Meet
 ## UI
-* Close camera
 * Self: Black after turning off cam
 * Meeting pic in UI before joining conference
 
 ## Protocol
 * LiveKit
-  * Hand up
-  * Reconnect
+  * Waiting room
   * Server
-  * Login
+    * Invite links
+  * Reconnect
 * M3 server
   * Open/close cam and mic
   * Participant opening/closing cam is delayed

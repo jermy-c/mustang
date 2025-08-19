@@ -32,7 +32,6 @@
     meter = newVolumeMeter(audioContext, { tweenIn: 1, tweenOut: 6 }, onVolumeChange);
     let source = audioContext.createMediaStreamSource(stream);
     source.connect(meter);
-    source.connect(audioContext.destination);
     stream.addEventListener("ended", () => meter.stop.bind(meter));
   }
 
@@ -59,7 +58,7 @@
     }*/
   }
 
-  onMount(() => catchErrors(startMeter));
+  onMount(() => setTimeout(() => catchErrors(startMeter), 100)); // Wait for audio source to start
   onDestroy(() => catchErrors(stopMeter));
 </script>
 

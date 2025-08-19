@@ -1,6 +1,7 @@
+import type { Account } from "../Abstract/Account";
 
-export function owaAutoFillLoginPage(username = "", password = "") {
-  return `(${autoFillPageScript})(${JSON.stringify(username)}, ${JSON.stringify(password)})`;
+export function autoFillLoginPage(account: Account) {
+  return `(${autoFillPageScript})(${JSON.stringify(account.username ?? "")}, ${JSON.stringify(account.password ?? "")})`;
 }
 
 /** This script will be exported as string and executed within the login page.
@@ -17,7 +18,7 @@ function autoFillPageScript(username, password) {
 
   function checkForWidgets() {
     // Hotmail sometimes uses submit buttons.
-    let inputs = [...document.querySelectorAll("input, button")] as (HTMLInputElement | HTMLButtonElement)[];
+    let inputs = [...document.querySelectorAll("input, button")].filter(input => input.checkVisibility()) as (HTMLInputElement | HTMLButtonElement)[];
     let user = inputs.filter(input => input.type == "text" || input.type == "email");
     let pass = inputs.filter(input => input.type == "password");
     let submit = inputs.filter(input => input.type == "submit");
