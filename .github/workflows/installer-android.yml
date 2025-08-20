@@ -43,10 +43,9 @@ jobs:
         mkdir -p ~/private_keys/
         echo '${{ secrets.KEYSTORE }}' | base64 --decode > ~/private_keys/key.jks
 
-    # ~/ or $HOME doesn't work in env:
     - run: cd mobile; export KEYSTORE_PATH=$HOME/private_keys/key.jks; yarn build:android
       env:
-        # KEYSTORE_PATH: $HOME/private_keys/key.jks
+        KEYSTORE_PATH: ${{ env.HOME }}/private_keys/key.jks
         KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
         KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         KEYSTORE_ALIAS_PASS: ${{ secrets.KEYSTORE_ALIAS_PASS }}
@@ -65,9 +64,16 @@ jobs:
         path: |
           mobile/android/app/build/outputs/bundle/release/*.aab
 
+    - name: Set version from package.json
+      run: |
+        cd mobile
+        VERSION=$(jq -r '.version' package.json)
+        echo "APP_VERSION=v$VERSION" >> $GITHUB_ENV
+
     - name: Add to release
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ env.APP_VERSION }}
         files: |
           mobile/android/app/build/outputs/apk/release/*.apk
           mobile/android/app/build/outputs/bundle/release/*.aab
