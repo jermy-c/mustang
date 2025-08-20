@@ -41,11 +41,11 @@ jobs:
 
     - run: |
         mkdir -p ~/private_keys/
-        echo '${{ secrets.KEYSTORE }}' | base64 --decode > ~/private_keys/key.jks
+        echo '${{ secrets.KEYSTORE }}' | base64 --decode > ${{ github.workspace }}/private_keys/key.jks
 
-    - run: cd mobile; export KEYSTORE_PATH=$HOME/private_keys/key.jks; yarn build:android
+    - run: cd mobile; yarn build:android
       env:
-        KEYSTORE_PATH: ${{ env.HOME }}/private_keys/key.jks
+        KEYSTORE_PATH: ${{ github.workspace }}/private_keys/key.jks
         KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
         KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
         KEYSTORE_ALIAS_PASS: ${{ secrets.KEYSTORE_ALIAS_PASS }}
