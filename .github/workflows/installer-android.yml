@@ -71,4 +71,3 @@ jobs:
         files: |
           mobile/android/app/build/outputs/apk/release/*.apk
           mobile/android/app/build/outputs/bundle/release/*.aab
-
