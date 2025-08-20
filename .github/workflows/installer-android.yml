@@ -31,44 +31,15 @@ jobs:
     - run: cd app; yarn install
     - run: cd lib; yarn install
     - run: cd backend; yarn install
-    - run: cd mobile; yarn install
     - run: cd mobile/backend; yarn install
-    - run: cd mobile; yarn build
+    - run: cd mobile/backend; yarn build
+    - run: cd mobile; yarn build && npx cap build android
       env:
-        ANDROID_LIBNODE: "https://github.com/mustang-im/nodejs-mobile/releases/download/v22.9.0/nodejs-mobile-v22.9.0-android.zip"
-        ANDROID_SDK: --sdk35
+        NODE_OPTIONS: '--max-old-space-size=32768'
         MOBILE_ARCH: 'android-arm64'
-
-    - run: |
-        mkdir -p ~/private_keys/
-        echo '${{ secrets.KEYSTORE }}' | base64 --decode > ~/private_keys/key.jks
-
-    # ~/ or $HOME doesn't work in env:
-    - run: cd mobile; export KEYSTORE_PATH=$HOME/private_keys/key.jks; yarn build:android
-      env:
-        # KEYSTORE_PATH: $HOME/private_keys/key.jks
-        KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
-        KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
-        KEYSTORE_ALIAS_PASS: ${{ secrets.KEYSTORE_ALIAS_PASS }}
-
-    - name: Upload APK
+    - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: mustang.apk
+        name: Installers Android
         path: |
-          mobile/android/app/build/outputs/apk/release/*.apk
-
-    - name: Upload AAB
-      uses: actions/upload-artifact@v4
-      with:
-        name: mustang.aab
-        path: |
-          mobile/android/app/build/outputs/bundle/release/*.aab
-
-    - name: Add to release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          mobile/android/app/build/outputs/apk/release/*.apk
-          mobile/android/app/build/outputs/bundle/release/*.aab
-
+          mobile/android/**
