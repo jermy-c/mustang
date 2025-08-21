@@ -90,7 +90,7 @@
   import { RecurrenceCase, type Event } from "../../../logic/Calendar/Event";
   import { CalendarEventMustangApp, calendarMustangApp } from "../CalendarMustangApp";
   import { selectedEvent } from "../selected";
-  import { openApp, selectedApp } from "../../AppsBar/selectedApp";
+  import { openApp, selectedApp, goBack } from "../../AppsBar/selectedApp";
   import Stack from "../../Shared/Stack.svelte";
   import RoundButton from "../../Shared/RoundButton.svelte";
   import Button from "../../Shared/Button.svelte";
@@ -138,9 +138,11 @@
   }
 
   function onClose() {
-    let me = calendarMustangApp.subApps.find(app => app instanceof CalendarEventMustangApp && app.mainWindowProperties.event == event);
+    let me = calendarMustangApp.subApps.find(app => app instanceof CalendarEventMustangApp && app.windowParams.event == event);
     calendarMustangApp.subApps.remove(me);
-    if (!isFullWindow) {
+    if (isFullWindow) {
+      goBack();
+    } else {
       // Make sidebar disappear, see CalendarApp.svelte
       $selectedEvent = null;
     }
@@ -152,7 +154,7 @@
 
   function onShrink() {
     $selectedEvent = event;
-    openApp(calendarMustangApp);
+    openApp(calendarMustangApp, { event: event });
   }
   // </copied>
 </script>

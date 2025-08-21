@@ -64,6 +64,7 @@
 
 <script lang="ts">
   import { Person } from "../../logic/Abstract/Person";
+  import { goTo } from "../AppsBar/selectedApp";
   import AppBarM from "../AppsBar/AppBarM.svelte";
   import ButtonMenu from "../Shared/Menu/ButtonMenu.svelte";
   import Button from "../Shared/Button.svelte";
@@ -72,7 +73,7 @@
   import PersonsIcon from "lucide-svelte/icons/users";
   import PictureIcon from "lucide-svelte/icons/image-plus";
   import FileIcon from "lucide-svelte/icons/file-plus";
-  import { goTo } from "../AppsBar/selectedApp";
+  import { URLPart } from "../Util/util";
   import { t } from "../../l10n/l10n";
   import { createEventDispatcher } from 'svelte';
   const dispatchEvent = createEventDispatcher<{ uploadFile: void, uploadPicture: void }>();
@@ -82,11 +83,11 @@
   let isMenuOpen = false;
 
   function goToPerson() {
-    goTo(`/files/person/${person.id}/files`);
+    goTo(URLPart`/files/person/${person.id}/files`, { person });
   }
 
   function goToPersons() {
-    goTo("/files/");
+    goTo("/files/", {});
   }
 
   function uploadFile() {

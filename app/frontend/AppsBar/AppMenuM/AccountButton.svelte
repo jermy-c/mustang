@@ -15,21 +15,23 @@
 
 <script lang="ts">
   import { Account } from "../../../logic/Abstract/Account";
-  import { goTo } from "../selectedApp";
+  import { goTo, type PageParams } from "../selectedApp";
   import RoundButton from "../../Shared/RoundButton.svelte";
   import AccountIcon from "lucide-svelte/icons/rabbit";
   import type { ComponentType } from 'svelte';
 
   export let account: Account;
   export let defaultIcon: ComponentType = AccountIcon;
-  export let goToAccount = goToAccountDefault;
   /**
    * Default handler for `goToAccount()`
    * @param account
    * @returns e.g. "/mail/folder/account45/inbox/" */
   export let page: (account: Account) => string | null = null;
+  export let params: PageParams = null;
+  export let goToAccount = goToAccountDefault;
 
   function goToAccountDefault(account: Account) {
-    goTo(page(account));
+    params ??= { account };
+    goTo(page(account), params);
   }
 </script>

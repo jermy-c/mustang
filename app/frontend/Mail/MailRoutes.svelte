@@ -1,17 +1,26 @@
-<Route path="/folder/:accountID/:folderID/message-list">
-  {ensureLoaded(selectedFolder, "/mail/")}
-  <MsgListM {messages} bind:searchMessages bind:selectedFolder={$selectedFolder} bind:selectedMessage={$selectedMessage} bind:selectedMessages={$selectedMessages} />
+<Route path="compose">
+  <MailComposer mail={params?.mail ?? $selectedFolder.newEMail()} />
 </Route>
-<Route path="/message/:accountID/:folderID/:messageID/display">
-  {ensureLoaded(selectedMessage, "/mail/")}
-  <MessageDisplay message={$selectedMessage} />
-</Route>
-<Route path="search">
-  <SearchM />
-</Route>
-<Route path="/">
-  <AccountsM {accounts} {folders} bind:selectedAccount={$selectedAccount} bind:selectedFolder={$selectedFolder} />
-</Route>
+{#if appGlobal.isMobile}
+  <Route path="folder/:accountID/:folderID/message-list">
+    <MsgListM messages={params?.messages ?? searchMessages ?? $selectedFolder?.messages ?? requiredParam()} bind:searchMessages bind:selectedFolder={$selectedFolder} bind:selectedMessage={$selectedMessage} bind:selectedMessages={$selectedMessages} />
+  </Route>
+  <Route path="message/:accountID/:folderID/:messageID/display">
+    <MessageDisplay message={params?.message ?? $selectedMessage ?? requiredParam()} />
+  </Route>
+  <Route path="search">
+    <SearchM />
+  </Route>
+  <Route path="/">
+    {params?.account ? $selectedAccount = params.account : null,
+     params?.folder ? $selectedFolder = params.folder : null, ""}
+    <AccountsM {accounts} {folders} bind:selectedAccount={$selectedAccount} bind:selectedFolder={$selectedFolder} />
+  </Route>
+{:else}
+  <Route path="/">
+    <MailApp />
+  </Route>
+{/if}
 
 <script lang="ts">
   import { showAccounts } from "../../logic/Mail/AccountsList/ShowAccounts";
@@ -22,18 +31,23 @@
   import { selectedWorkspace } from "../MainWindow/Selected";
   import { selectedPerson } from "../Contacts/Person/Selected";
   import { getLocalStorage } from "../Util/LocalStorage";
+  import { appGlobal } from "../../logic/app";
+  import MailApp from "./MailApp.svelte";
+  import MailComposer from "./Composer/MailComposer.svelte";
   import MsgListM from "./Vertical/MessageListM.svelte";
   import SearchM from "./Search/SearchM.svelte";
   import MessageDisplay from "./Message/MessageDisplay.svelte";
   import AccountsM from "./LeftPane/AccountsM.svelte";
   import { showError } from "../Util/error";
-  import { ensureLoaded } from "../Util/svelte";
   import { ArrayColl } from "svelte-collections";
-  import { Route } from "svelte-navigator";
+  import { getParams } from "../AppsBar/selectedApp";
+  import { requiredParam } from "../Util/route";
+  import { Route, useLocation } from "svelte-navigator";
 
-  $: accounts = showAccounts.filter(acc => acc.workspace == $selectedWorkspace || !$selectedWorkspace); // || acc == allAccountsAccount
+  $: accounts = showAccounts.filterObservable(acc => acc.workspace == $selectedWorkspace || !$selectedWorkspace); // ?? acc == allAccountsAccount
   $: folders = $selectedAccount?.rootFolders ?? new ArrayColl<Folder>();
-  $: messages = searchMessages ?? $selectedFolder?.messages ?? new ArrayColl<EMail>();
+  $: location = useLocation();
+  $: params = getParams($location.state);
 
   let searchMessages: ArrayColl<EMail> | null;
 
