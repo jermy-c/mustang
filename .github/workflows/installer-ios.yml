@@ -54,6 +54,7 @@ jobs:
         env:
           IOS_CERTIFICATE_OWNER_NAME: ${{ secrets.IOS_CERTIFICATE_OWNER_NAME }}
           IOS_PROVISION_PROFILE_NAME: 'Mustang Mail'
+          IOS_TEAM_ID: '2QD8MW9GBW'
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
