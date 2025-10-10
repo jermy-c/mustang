@@ -9,5 +9,6 @@ perl -p -i \
   -e "s|\"version\": \".*\"|\"version\": \"$VERSION\"|;" \
   ../../e2/package.json
 
-perl -e 'print "IOS_PROVISION_PROFILE_NAME=Mustang Mail\n"' >> $ENV{"GITHUB_ENV"}
-perl -e 'print "IOS_TEAM_ID=2QD8MW9GBW\n"' >> $ENV{"GITHUB_ENV"}
+# Github env variables need to written to GITHUB_ENV
+perl -e 'open(my $fh, ">>", $ENV{"GITHUB_ENV"}) or die $!; print $fh "IOS_PROVISION_PROFILE_NAME=Mustang Mail\n"; close $fh;'
+perl -e 'open(my $fh, ">>", $ENV{"GITHUB_ENV"}) or die $!; print $fh "IOS_TEAM_ID=2QD8MW9GBW\n"; close $fh;'
