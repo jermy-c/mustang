@@ -8,4 +8,6 @@ perl -p -i \
 perl -p -i \
   -e "s|\"version\": \".*\"|\"version\": \"$VERSION\"|;" \
   ../../e2/package.json
-perl -e '$ENV{"IOS_PROVISION_PROFILE_NAME"} = "Mustang Mail";'
+
+perl -e 'print "IOS_PROVISION_PROFILE_NAME=Mustang Mail\n"' >> $ENV{"GITHUB_ENV"}
+perl -e 'print "IOS_TEAM_ID=2QD8MW9GBW\n"' >> $ENV{"GITHUB_ENV"}
