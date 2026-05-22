@@ -81,6 +81,8 @@ publish:
     protocol: https
     releaseType: release
     channel: mustang
+    owner: jermy-c
+    repo: mustang
 #  - provider generic
 #    url: https://mustang.im/auto-updates
 extraMetadata:
